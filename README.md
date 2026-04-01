@@ -1,6 +1,6 @@
 # Blog App
 
-A full-stack blog application built with **Node.js**, **Express**, **MongoDB**, and vanilla **HTML/CSS/JS**. Features real-time comments and likes via **Socket.IO**, article scraping, image uploads, and JWT authentication.
+A full-stack blog application built with **Node.js**, **Express**, **MongoDB**, **React**and vanilla **HTML/CSS/JS**. Features real-time comments and likes via **Socket.IO**, article scraping, image uploads, and JWT authentication.
 
 ---
 
@@ -27,7 +27,10 @@ A full-stack blog application built with **Node.js**, **Express**, **MongoDB**, 
 | Realtime  | Socket.IO                               |
 | Scraping  | @postlight/parser, axios, cheerio       |
 | Uploads   | Multer                                  |
-| Frontend  | Vanilla HTML, CSS, JavaScript           |
+| Frontend  | Vanilla HTML, CSS, JavaScript  react
+# Blogify
+
+A full-stack blog platform built with **Node.js**, **Express**, **MongoDB**, and **React**.
 
 ---
 
@@ -35,145 +38,207 @@ A full-stack blog application built with **Node.js**, **Express**, **MongoDB**, 
 
 ```
 blog/
-├── backend/
-│   ├── config/
-│   │   └── db.js               # MongoDB connection
-│   ├── controllers/
-│   │   ├── authController.js   # Register & login
-│   │   ├── commentController.js# Comments & replies CRUD + likes
-│   │   ├── postController.js   # Posts CRUD + likes + save
-│   │   └── scrapeController.js # Article URL scraper
-│   ├── middlewares/
-│   │   ├── auth.js             # JWT protect & adminOnly
-│   │   └── upload.js           # Multer image upload
-│   ├── models/
-│   │   ├── Comment.js          # Comment & reply schemas
-│   │   ├── Post.js             # Post schema
-│   │   └── User.js             # User schema
-│   ├── routes/
-│   │   ├── auth.js
-│   │   ├── comments.js
-│   │   ├── posts.js
-│   │   └── scrape.js
-│   ├── services/
-│   │   └── scraper.js          # Postlight + cheerio scraping logic
-│   ├── uploads/                # Uploaded images (gitignored)
-│   ├── .env
-│   └── server.js               # Entry point
-└── frontend/
-    ├── css/
-    │   └── style.css
-    ├── js/
-    │   └── api.js              # Shared fetch helper, auth utils
-    ├── pages/
-    │   ├── login.html
-    │   ├── register.html
-    │   ├── post.html           # Single post view + comments
-    │   └── post-form.html      # Create / edit post
-    └── index.html              # Posts listing
+├── backend/          # Express API server
+└── frontend-react/   # React + Vite frontend
 ```
+
+---
+
+## Tech Stack
+
+### Backend
+| Package | Purpose |
+|---|---|
+| Express 5 | HTTP server & routing |
+| Mongoose | MongoDB ODM |
+| bcrypt | Password hashing |
+| jsonwebtoken | JWT authentication |
+| multer | File uploads (max 1MB) |
+| socket.io | Real-time likes & comments |
+| express-validator | Request validation |
+| axios + cheerio | Article scraping (fallback) |
+| @postlight/parser | Article scraping (primary) |
+| dotenv | Environment variables |
+| cors | Cross-origin requests |
+
+### Frontend
+| Package | Purpose |
+|---|---|
+| React 18 | UI library |
+| Vite | Build tool |
+| React Router v6 | Client-side routing |
+| Axios | HTTP requests |
+| Socket.IO Client | Real-time updates |
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) v18+
-- [MongoDB](https://www.mongodb.com/) running locally or a MongoDB Atlas URI
-
-### Installation
-
+### 1. Install backend dependencies
 ```bash
-# 1. Clone the repo
-git clone <repo-url>
-cd blog/backend
-
-# 2. Install dependencies
+cd backend
 npm install
-
-# 3. Configure environment
-# Edit backend/.env with your values (see below)
-
-# 4. Start the server
-npm run dev      # development (nodemon)
-# or
-npm start        # production
 ```
 
-### Environment Variables
-
-Create a `.env` file inside `backend/`:
-
+### 2. Configure environment variables
+Edit `backend/.env`:
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/blogdb
-JWT_SECRET=your_strong_secret_here
+JWT_SECRET=your_real_secret_here
 ```
 
-> The server will refuse to start if `JWT_SECRET` is missing or left as the default placeholder.
+### 3. Start the backend
+```bash
+cd backend
+node server.js
+```
 
-### Open the App
+### 4. Build the React frontend
+```bash
+cd frontend-react
+npm install
+npm run build
+```
 
-Navigate to [http://localhost:5000](http://localhost:5000) in your browser.
+### 5. Open in browser
+```
+http://localhost:5000
+```
+
+> For frontend development with hot reload:
+> ```bash
+> cd frontend-react
+> npm run dev   # runs on http://localhost:5000
+> ```
 
 ---
 
-## API Reference
+## API Endpoints
 
 ### Auth — `/api/auth`
-
-| Method | Endpoint    | Body                          | Description     |
-|--------|-------------|-------------------------------|-----------------|
-| POST   | `/register` | `name, email, password, role` | Create account  |
-| POST   | `/login`    | `email, password`             | Login, get token|
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| POST | `/register` | ✗ | Register new user |
+| POST | `/login` | ✗ | Login and get token |
+| GET | `/saved` | ✓ | Get saved posts |
 
 ### Posts — `/api/posts`
-
-| Method | Endpoint         | Auth | Description              |
-|--------|------------------|------|--------------------------|
-| GET    | `/`              | —    | List posts (paginated)   |
-| GET    | `/:id`           | —    | Get single post          |
-| POST   | `/`              | ✓    | Create post              |
-| PUT    | `/:id`           | ✓    | Update post              |
-| DELETE | `/:id`           | ✓    | Delete post              |
-| POST   | `/:id/like`      | ✓    | Toggle like              |
-| POST   | `/:id/save`      | ✓    | Toggle save              |
-| GET    | `/:id/comments`  | —    | Get comments for post    |
-| POST   | `/:id/comments`  | ✓    | Add comment to post      |
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| GET | `/` | ✗ | Get all posts (paginated, searchable) |
+| GET | `/:id` | ✗ | Get single post |
+| POST | `/` | ✓ | Create post |
+| PUT | `/:id` | ✓ | Update post (owner/admin) |
+| DELETE | `/:id` | ✓ | Delete post (owner/admin) |
+| POST | `/:id/like` | ✓ | Toggle like |
+| POST | `/:id/save` | ✓ | Toggle save |
+| GET | `/:id/comments` | ✗ | Get comments |
+| POST | `/:id/comments` | ✓ | Add comment |
 
 ### Comments — `/api/comments`
-
-| Method | Endpoint                        | Auth | Description       |
-|--------|---------------------------------|------|-------------------|
-| DELETE | `/:id`                          | ✓    | Delete comment    |
-| POST   | `/:id/like`                     | ✓    | Toggle like       |
-| POST   | `/:id/replies`                  | ✓    | Add reply         |
-| DELETE | `/:id/replies/:replyId`         | ✓    | Delete reply      |
-| POST   | `/:id/replies/:replyId/like`    | ✓    | Toggle reply like |
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| DELETE | `/:id` | ✓ | Delete comment (owner/admin) |
+| POST | `/:id/like` | ✓ | Toggle comment like |
+| POST | `/:id/replies` | ✓ | Add reply |
+| DELETE | `/:id/replies/:replyId` | ✓ | Delete reply (owner/admin) |
+| POST | `/:id/replies/:replyId/like` | ✓ | Toggle reply like |
 
 ### Scrape — `/api/scrape`
-
-| Method | Endpoint | Auth | Body  | Description              |
-|--------|----------|------|-------|--------------------------|
-| POST   | `/`      | ✓    | `url` | Scrape article from URL  |
-
----
-
-## Socket.IO Events
-
-| Event          | Direction       | Payload                          |
-|----------------|-----------------|----------------------------------|
-| `join_post`    | client → server | `postId`                         |
-| `leave_post`   | client → server | `postId`                         |
-| `new_comment`  | server → client | comment object                   |
-| `new_reply`    | server → client | `{ commentId, reply }`           |
-| `like_updated` | server → client | `{ postId, likes }`              |
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| POST | `/` | ✓ | Import article from URL |
 
 ---
 
-## Notes
+## Features
 
-- Uploaded images are stored in `backend/uploads/` and served at `/uploads/<filename>`
-- The scraper tries [@postlight/parser](https://github.com/postlight/parser) first, then falls back to axios + cheerio
-- Any user can register as admin via the register page (for demo purposes)
+### Authentication
+- Register / Login with JWT (7 day expiry)
+- Role-based access: `user` and `admin`
+- Passwords hashed with bcrypt (10 rounds)
+- Token stored in localStorage
+
+### Posts
+- Create, edit, delete posts
+- Cover photo upload (max **1MB**, jpeg/jpg/png/webp)
+- Import article from any URL (auto-fills title, content, image)
+- Like / Unlike posts (real-time via Socket.IO)
+- Save / Unsave posts
+- Search posts by title or content
+- Pagination (9 posts per page)
+- Only post owner or admin can edit/delete
+
+### Comments & Replies
+- Add, delete comments
+- Like / Unlike comments
+- Nested replies on comments
+- Like / Unlike replies
+- Real-time new comments via Socket.IO
+- Only comment owner or admin can delete
+
+### Frontend (React)
+- **Dark mode** toggle (persists in localStorage)
+- **Search** posts from navbar
+- **Toast notifications** for all actions
+- **Reading time** estimate on posts
+- **Hero section** with live post count
+- **Post excerpt** preview on cards
+- **Numbered pagination**
+- Fully responsive design
+- Sticky navbar with blur effect
+
+### React Concepts Used
+| Concept | Where |
+|---|---|
+| `useState` | Every component |
+| `useEffect` + cleanup | PostDetail, PostForm, useFetch |
+| `useContext` + `createContext` | AuthContext, ToastContext |
+| `useRef` | PostForm file input |
+| `useNavigate`, `useParams` | PostDetail, PostForm, Navbar |
+| Custom hooks | `useFetch`, `useForm` |
+| Controlled inputs | Login, Register, PostForm |
+| List rendering + `key` | Home, CommentSection |
+| Conditional rendering | Navbar, PostDetail, CommentSection |
+| Props + destructuring | PostCard, UI components |
+| `FormData` | PostForm |
+| Axios interceptors | `api/axios.js` |
+| Socket.IO | PostDetail |
+| Protected routes | SavedPosts, PostForm |
+
+---
+
+## Data Models
+
+### User
+```js
+{ name, email, password, role: "user"|"admin", savedPosts: [PostId] }
+```
+
+### Post
+```js
+{ title, content, photo, author: UserId, likes: [UserId] }
+```
+
+### Comment
+```js
+{
+  content, author: UserId, post: PostId,
+  likes: [UserId],
+  replies: [{ content, author: UserId, likes: [UserId] }]
+}
+```
+
+---
+
+## Environment Variables
+
+| Variable | Description | Example |
+|---|---|---|
+| `PORT` | Server port | `5000` |
+| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/blogdb` |
+| `JWT_SECRET` | Secret key for JWT signing | `your_strong_secret` |
+
+
+
